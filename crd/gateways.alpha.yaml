@@ -1,0 +1,433 @@
+# TykGateway - CustomResourceDefinition
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: gateways.configuration.tyk.io
+spec:
+  # group name to use for REST API: /apis/<group>/<version>
+  group: configuration.tyk.io
+  version: alpha
+  scope: Namespaced
+  names:
+    plural: gateways
+    singular: gateway
+    kind: TykGateway
+    shortNames:
+      - tg
+      - tgw
+  validation:
+    openAPIV3Schema:
+      type: object
+      properties:
+        spec:
+          type: object
+          properties:
+            listen_port:
+              type: integer
+            enable_jsvm:
+              type: boolean
+            db_app_conf_options:
+              type: object
+              properties:
+                node_is_segmented:
+                  type: boolean
+                tags:
+                  type: array
+                  items:
+                    type: string
+            secret:
+              type: string
+            template_path:
+              type: string
+            tyk_js_path:
+              type: string
+            middleware_path:
+              type: string
+            use_db_app_configs:
+              type: boolean
+            app_path:
+              type: string
+            policies:
+              type: object
+              properties:
+                policy_source:
+                  type: string
+                policy_record_name:
+                  type: string
+            storage:
+              type: object
+              properties:
+                type:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: integer
+                database:
+                  type: integer
+                optimisation_max_idle:
+                  type: integer
+                optimisation_max_active:
+                  type: integer
+            slave_options:
+              type: object
+              properties:
+                use_rpc:
+                  type: boolean
+                rpc_key:
+                  type: string
+                api_key:
+                  type: string
+                connection_string:
+                  type: string
+                enable_rpc_cache:
+                  type: boolean
+                bind_to_slugs:
+                  type: boolean
+                group_id:
+                  type: string
+                use_ssl:
+                  type: boolean
+                ssl_insecure_skip_verify:
+                  type: boolean
+                disable_keyspace_sync:
+                  type: boolean
+                call_timeout:
+                  type: integer
+                ping_timeout:
+                  type: integer
+                rpc_pool_size:
+                  type: integer
+            enable_analytics:
+              type: boolean
+            analytics_config:
+              type: object
+              properties:
+                type:
+                  type: string
+                ignored_ips:
+                  type: array
+                enable_detailed_recording:
+                  type: boolean
+                enable_geo_ip:
+                  type: boolean
+                geo_ip_db_path:
+                  type: string
+                normalise_urls:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    normalise_uuids:
+                      type: boolean
+                    normalise_numbers:
+                      type: boolean
+                    custom_patterns:
+                      type: array
+                pool_size:
+                  type: integer
+                records_buffer_size:
+                  type: integer
+                storage_expiration_time:
+                  type: integer
+            optimisations_use_async_session_write:
+              type: boolean
+            session_update_pool_size:
+              type: integer
+            session_update_buffer_size:
+              type: integer
+            allow_master_keys:
+              type: boolean
+            enable_http_profiler:
+              type: boolean
+            hash_keys:
+              type: boolean
+            hash_key_function:
+              type: string
+            suppress_redis_signal_reload:
+              type: boolean
+            suppress_default_org_store:
+              type: boolean
+            use_redis_log:
+              type: boolean
+            use_sentry:
+              type: boolean
+            sentry_code:
+              type: string
+            use_syslog:
+              type: boolean
+            syslog_network_addr:
+              type: string
+            syslog_transport:
+              type: string
+            use_graylog:
+              type: boolean
+            graylog_network_addr:
+              type: string
+            use_logstash:
+              type: boolean
+            logstash_network_addr:
+              type: string
+            logstash_transport:
+              type: string
+            statsd_connection_string:
+              type: string
+            statsd_prefix:
+              type: string
+            enforce_org_data_age:
+              type: boolean
+            enforce_org_data_detail_logging:
+              type: boolean
+            enforce_org_quotas:
+              type: boolean
+            experimental_process_org_off_thread:
+              type: boolean
+            enable_non_transactional_rate_limiter:
+              type: boolean
+            enable_sentinel_rate_limiter:
+              type: boolean
+            enable_redis_rolling_limiter:
+              type: boolean
+            management_node:
+              type: boolean
+            monitor:
+              type: object
+              properties:
+                enable_trigger_montiors:
+                  type: boolean
+                configuration:
+                  type: object
+                  properties:
+                    method:
+                      type: string
+                    target_path:
+                      type: string
+                    template_path:
+                      type: string
+                    header_map:
+                      # TODO: IS THIS CORRECT? Nullable
+                      type: object
+                    event_timeout:
+                      type: integer
+                global_trigger_limit:
+                  type: integer
+                monitor_user_keys:
+                  type: boolean
+                monitor_org_keys:
+                  type: boolean
+            oauth_refresh_token_expire:
+              type: integer
+            oauth_token_expire:
+              type: integer
+            oauth_token_expired_retain_period:
+              type: integer
+            oauth_redirect_uri_separator:
+              type: string
+            disable_virtual_path_blobs:
+              type: boolean
+            local_session_cache:
+              type: object
+              properties:
+                disable_cached_session_state:
+                  type: boolean
+                cached_session_timeout:
+                  type: integer
+                cached_session_eviction:
+                  type: integer
+            http_server_options:
+              type: object
+              properties:
+                override_defaults:
+                  type: boolean
+                read_timeout:
+                  type: integer
+                write_timeout:
+                  type: integer
+                use_ssl:
+                  type: boolean
+                use_le:
+                  type: boolean
+                ssl_insecure_skip_verify:
+                  type: boolean
+                enable_websockets:
+                  type: boolean
+                certificates:
+                  type: array
+                ssl_certificates:
+                  # TODO: is this correct? null
+                  type: array
+                server_name:
+                  type: string
+                min_version:
+                  type: integer
+                flush_interval:
+                  type: integer
+                skip_url_cleaning:
+                  type: boolean
+                skip_target_path_escaping:
+                  type: boolean
+                ssl_ciphers:
+                  type: array
+                  items:
+                    type: string
+            service_discovery:
+              type: object
+              properties:
+                default_cache_timeout: integer
+            proxy_close_connections:
+              type: boolean
+            close_connections:
+              type: boolean
+            auth_override:
+              type: object
+              properties:
+                force_auth_provider:
+                  type: boolean
+                auth_provider:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    storage_engine:
+                      type: string
+                    meta:
+                      type: object
+                force_session_provider:
+                  type: boolean
+                session_provider:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    storage_engine:
+                      type: string
+                    meta:
+                      type: object
+            uptime_tests:
+              type: object
+              properties:
+                disable:
+                  type: boolean
+                config:
+                  type: object
+                  properties:
+                    failure_trigger_sample_size:
+                      type: integer
+                    time_wait:
+                      type: integer
+                    checker_pool_size:
+                      type: integer
+                    enable_uptime_analytics:
+                      type: boolean
+            hostname:
+              type: string
+            enable_api_segregation:
+              type: boolean
+            control_api_hostname:
+              type: string
+            control_api_port:
+              type: integer
+            enable_custom_domains:
+              type: boolean
+            jsvm_timeout:
+              type: integer
+            coprocess_options:
+              type: object
+              properties:
+                enable_coprocess:
+                  type: boolean
+                coprocess_grpc_server:
+                  type: string
+            hide_generator_header:
+              type: bool
+            event_handlers:
+              type: object
+              properties:
+                events:
+                  type: object
+            event_triggers_defunct:
+              # TODO - Check Type
+              type: object
+            pid_file_location:
+              type: string
+            allow_insecure_configs:
+              type: boolean
+            public_key_path:
+              type: string
+            close_idle_connections:
+              type: boolean
+            bundle_base_url:
+              type: string
+            enable_bundle_downloader:
+              type: boolean
+            allow_remote_config:
+              type: boolean
+            legacy_enable_allowance_countdown:
+              type: boolean
+            max_idle_connections:
+              type: integer
+            max_idle_connections_per_host:
+              type: integer
+            max_conn_time:
+              type: integer
+            reload_wait_time:
+              type: integer
+            proxy_ssl_insecure_skip_verify:
+              type: boolean
+            proxy_ssl_min_version:
+              type: integer
+            proxy_ssl_ciphers:
+              type: array
+              items:
+                type: string
+            proxy_default_timeout:
+              type: integer
+            proxy_ssl_disable_renegotiation:
+              type: boolean
+            log_level:
+              type: string
+            version_header:
+              type: string
+            enable_hashed_keys_listing:
+              type: boolean
+            min_token_length:
+              type: integer
+            disable_regexp_cache:
+              type: boolean
+            regexp_cache_expire:
+              type: integer
+            health_check_endpoint_name:
+              type: string
+            security:
+              type: object
+              properties:
+                private_certificate_encoding_secret:
+                  type: string
+                control_api_use_mutual_tls:
+                  type: boolean
+                pinned_public_keys:
+                  # TODO: check this
+                  type: array
+                certificates:
+                  # TODO: check this
+                  type: object
+                  properties:
+                    apis:
+                      type: object
+                    upstream:
+                      type: object
+                    control_api:
+                      type: object
+                    dashboard_api:
+                      type: object
+                    mdcb_api:
+                      type: object
+            enable_key_logging:
+              type: boolean
+            newrelic:
+              type: object
+              properties:
+                app_name:
+                  type: string
+                license_key:
+                  type: string
