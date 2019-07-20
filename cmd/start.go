@@ -1,15 +1,17 @@
 package cmd
 
 import (
+	"net/http"
+	"os"
+	"os/signal"
+	"sync"
+
 	"github.com/TykTechnologies/tyk-k8s/ingress"
 	"github.com/TykTechnologies/tyk-k8s/injector"
 	"github.com/TykTechnologies/tyk-k8s/logger"
 	"github.com/TykTechnologies/tyk-k8s/webserver"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"os/signal"
-	"sync"
 )
 
 var log = logger.GetLogger("main")
@@ -20,49 +22,40 @@ var startCmd = &cobra.Command{
 	Short: "starts the controller",
 	Long:  `Starts the controller.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		sConf := &webserver.Config{}
-		err := viper.UnmarshalKey("Server", sConf)
-		if err != nil {
-			log.Fatalf("no Server entry found in config file: %v", err)
-		}
+		var err error
 
-		// Web server mutating webhook
-		webserver.Server().Config(sConf)
+		sConf := &webserver.Config{}
+		err = viper.UnmarshalKey("Server", sConf)
+		fatalOnErr(err, "no Server entry in config file")
+
 		whConf := &injector.Config{}
 		err = viper.UnmarshalKey("Injector", whConf)
-		if err != nil {
-			log.Fatalf("couldn't read injector config: %v", err)
-		}
+		fatalOnErr(err, "couldn't read injector config")
 
 		whs := &injector.WebhookServer{
 			SidecarConfig: whConf,
 		}
 
-		webserver.Server().AddRoute("POST", "/inject", whs.Serve)
+		webserver.Server().Config(sConf)
+		webserver.Server().AddRoute(http.MethodPost, "/inject", whs.Serve)
 
 		// Ingress controller
 		ingress.NewController()
 		err = ingress.Controller().Start()
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Info("ingress controller started")
+		fatalOnErr(err, "unable to start ingress controller")
+
+		log.Info("Ingress controller started")
 
 		go webserver.Server().Start()
 		log.Info("web server started")
 
-		WaitForCtrlC()
+		waitForCtrlC()
 
 		err = webserver.Server().Stop()
-		if err != nil {
-			log.Error(err)
-		}
+		fatalOnErr(err, "unable to stop web server")
 
 		err = ingress.Controller().Stop()
-		if err != nil {
-			log.Error(err)
-		}
-
+		fatalOnErr(err, "unable to stop ingress controller")
 	},
 }
 
@@ -70,15 +63,23 @@ func init() {
 	rootCmd.AddCommand(startCmd)
 }
 
-func WaitForCtrlC() {
-	var end_waiter sync.WaitGroup
-	end_waiter.Add(1)
-	var signal_channel chan os.Signal
-	signal_channel = make(chan os.Signal, 1)
-	signal.Notify(signal_channel, os.Interrupt)
+// fatalOnErr logs error msg & exits with non 0 exit code when error is not nil
+func fatalOnErr(err error, fmt string, fields ...interface{}) {
+	if err != nil {
+		log.WithError(err).Fatalf(fmt, fields...)
+	}
+}
+
+// waitForCtrlC blocks until signal to terminate
+func waitForCtrlC() {
+	var endWaiter sync.WaitGroup
+	endWaiter.Add(1)
+	var signalCh chan os.Signal
+	signalCh = make(chan os.Signal, 1)
+	signal.Notify(signalCh, os.Interrupt)
 	go func() {
-		<-signal_channel
-		end_waiter.Done()
+		<-signalCh
+		endWaiter.Done()
 	}()
-	end_waiter.Wait()
+	endWaiter.Wait()
 }
